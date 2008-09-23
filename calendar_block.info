@@ -1,0 +1,11 @@
+; $Id$
+name = Calendar Block
+description = Highly customizable calendar block for various purposes 
+package = User Interface
+version = VERSION
+core = 6.x
+
+; Information added by drupal.org packaging script on 2008-05-12
+version = "6.1"
+project = "drupal"
+datestamp = "1204142108"
