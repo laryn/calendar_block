@@ -287,7 +287,7 @@ function calender_block_help_page() {
   $output .= '</ul></p>';
   $output .= '<p><code>&$op</code>: '. t('What kind of action is being performed. Possible values:') .'</p>';
   $output .= '<p><ul><li>"alter": '. t('In this operation $date->content can be changed.') .'</li>';
-  $output .= '<li>"load": '. t('In this operation you can set the month on which the calendar has to be loaded.') .'</li>';
+  $output .= '<li>"load": '. t('In this operation you can set the month on which the calendar has got to be loaded. The block\'s title can also be changed here.') .'</li>';
   $output .= '</ul></p>';
   $output .= '<p><strong>'. t('Code') .':</strong></p>';
   $output .= '<p><pre class="php">';
@@ -300,7 +300,7 @@ function calender_block_help_page() {
   $output .= '      }'."<br />";
   $output .= '      break;'."<br />";
   $output .= '    case \'load\':'."<br />";
-  $output .= '      // Here the date is fixed on october 1978'."<br />";
+  $output .= '      // Set the month on which the calendar has to be loaded'."<br />";
   $output .= '      $date->month = 10;'."<br />";
   $output .= '      $date->year = 1978;'."<br />";
   $output .= '      break;'."<br />";
