@@ -21,12 +21,15 @@ function calendar_block_help($section) {
 /**
  * Implementation of hook_menu().
  */
-function calendar_block_menu() {
-  $items['calendar_block_ajax'] = array(  
-    'page callback' => 'calendar_block_ajax',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK,
-  );
+function calendar_block_menu($may_cache) {
+  if ($may_cache) {
+    $items[] = array(
+      'path' => 'calendar_block_ajax',
+      'callback' => 'calendar_block_ajax',
+      'access' => user_access('access content'),
+      'type' => MENU_CALLBACK,
+    );
+  }
   return $items;
 }
 
@@ -60,7 +63,7 @@ function calendar_block_block($op = 'list', $delta = 0, $edit = array()) {
           '#maxlength' => '7',
         );
         if ($element !== 'width') {
-          $form['calendar_block'][$element]['#default_value'] = '#'. $form['calendar_block'][$element]['#default_value'];
+          $form['calendar_block'][$element]['#default_value'] = '#'.$form['calendar_block'][$element]['#default_value'];
         }
         else {
           $form['calendar_block'][$element]['#slider_settings'] = array('min' => 120, 'max' => 200, 'slide' => 'Drupal.calendar.sliderSlide');
@@ -97,7 +100,7 @@ function calendar_block_block($op = 'list', $delta = 0, $edit = array()) {
       $date = (object) array('year' => date('Y'), 'month' => date('m'));
       // Give other modules the opportunity set the date for the calendar
       foreach (module_implements('calendar_block') as $module) {
-        $function = $module .'_calendar_block';
+        $function = $module.'_calendar_block';
         $function($date, 'load');
       }
 
@@ -107,26 +110,15 @@ function calendar_block_block($op = 'list', $delta = 0, $edit = array()) {
       drupal_add_js(array('calendar_block' => array(
         'date' => $date,
         'ajax_response_path' => url('calendar_block_ajax'),
-        'background_color' => '#'. variable_get('calendar_background_color', 'FFFFFF'),
-        'font_color' => '#'. variable_get('calendar_font_color', '494949'),
-        'header_color' => '#'. variable_get('calendar_header_color', '494949'),
-        'link_color' => '#'. variable_get('calendar_link_color', '027AC6'),
-        'border_color' => '#'. variable_get('calendar_border_color', 'a5a5a5'),
+        'background_color' => '#'.variable_get('calendar_background_color', 'FFFFFF'),
+        'font_color' => '#'.variable_get('calendar_font_color', '494949'),
+        'header_color' => '#'.variable_get('calendar_header_color', '494949'),
+        'link_color' => '#'.variable_get('calendar_link_color', '027AC6'),
+        'border_color' => '#'.variable_get('calendar_border_color', 'a5a5a5'),
         'width' => variable_get('calendar_width', 173),
       )), 'setting');
       return $block;
   }
-}
-
-/**
- * Implementation of hook_theme().
- */
-function calendar_block_theme() {
-  return array(
-    'calendar_block' => array(
-      'arguments' => array('day' => NULL, 'op' => NULL),
-    ),
-  );
 }
 
 /**
@@ -205,7 +197,7 @@ function theme_calendar_block($data) {
   $output[] = '  <div id="calendar">';
 
   // Create the month and year row
-  $output[] = '    <div id="calendar_row'. $row_counter .'" class="clear-block">';
+  $output[] = '    <div id="calendar_row'.$row_counter.'" class="clear-block">';
   $output[] = '      <div id="nav" class="clear-block">';
   $output[] = '        <div id="calendar_prev" class="'. ($data->month > 1 ? ($data->month - 1) ."-$data->year" : "12-". ($data->year - 1)) .'"><span>&lt;</span></div>';
   $output[] = '        <div id="calendar_month">'. $data->month_str .' '. $data->year .'</div>';
@@ -229,7 +221,7 @@ function theme_calendar_block($data) {
     $date->date = (strlen($date->month) == 1 ? "0$date->month" : $date->month) ."-$date->day-$date->year";
     // Give other modules the opportunity to change the content for each date
     foreach (module_implements('calendar_block') as $module) {
-      $function = $module .'_calendar_block';
+      $function = $module.'_calendar_block';
       $function($date, 'alter');
     }
 
@@ -264,9 +256,6 @@ function theme_calendar_block($data) {
   return join("\n", $output);
 }
 
-/**
- * The help page.
- */
 function calender_block_help_page() {
   $output = '<p>'. t('The <em>calendar_block</em> module provides a fully customizable calendar block which can be placed in a region at the !blocks_link.', array('!blocks_link' => l(t('blocks section'), 'admin/build/block')));
   $output .= ' '. t('In the !block_config of the calendar block, the calendar\'s layout can be fully changed. You can set the colors as well as the size of the calendar so it fits to your websites design.', array('!block_config' => l(t('configuration form'), 'admin/build/block/configure/calendar_block/0'))) .'</p>';
@@ -287,7 +276,7 @@ function calender_block_help_page() {
   $output .= '</ul></p>';
   $output .= '<p><code>&$op</code>: '. t('What kind of action is being performed. Possible values:') .'</p>';
   $output .= '<p><ul><li>"alter": '. t('In this operation $date->content can be changed.') .'</li>';
-  $output .= '<li>"load": '. t('In this operation you can set the month on which the calendar has got to be loaded. The block\'s title can also be changed here.') .'</li>';
+  $output .= '<li>"load": '. t('In this operation you can set the month on which the calendar has to be loaded.') .'</li>';
   $output .= '</ul></p>';
   $output .= '<p><strong>'. t('Code') .':</strong></p>';
   $output .= '<p><pre class="php">';
@@ -300,7 +289,7 @@ function calender_block_help_page() {
   $output .= '      }'."<br />";
   $output .= '      break;'."<br />";
   $output .= '    case \'load\':'."<br />";
-  $output .= '      // Set the month on which the calendar has to be loaded'."<br />";
+  $output .= '      // Here the date is fixed on october 1978'."<br />";
   $output .= '      $date->month = 10;'."<br />";
   $output .= '      $date->year = 1978;'."<br />";
   $output .= '      break;'."<br />";
@@ -313,4 +302,17 @@ function calender_block_help_page() {
   $output .= '<li><strong>Week format</strong>: '. t('Administrators should be able to set the first day of the week.') .'</li>';
   $output .= '</ul></p>';
   return $output;
+}
+
+/**
+ * Calendar days in month
+ *
+ * Some PHP versions don't have cal_days_in_month(), this accounts for that.
+ */
+if (!function_exists('cal_days_in_month')) { 
+  function cal_days_in_month($calendar, $month, $year) {
+    // $calendar just gets ignored, assume gregorian
+    // calculate number of days in a month
+    return $month == 2 ? ($year % 4 ? 28 : ($year % 100 ? 29 : ($year % 400 ? 28 : 29))) : (($month - 1) % 7 % 2 ? 30 : 31);
+  }
 }
