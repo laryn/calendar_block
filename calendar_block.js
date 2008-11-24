@@ -8,7 +8,7 @@ function calendar() {
     //trace(ref.settings);
 
     ref.ajax_settings = {type: "POST", url: ref.settings.ajax_response_path, success:function(result) { ref.ajaxResponse(result)}};
-    ref.getCalandar(ref.settings.date.month, ref.settings.date.year);
+    ref.getCalandar(ref.settings.calendar.month, ref.settings.calendar.year);
     ref.setColors(true);
   };
   
@@ -60,6 +60,7 @@ function calendar() {
     if (year && month) {
       ref.ajax_settings.data = {month:month, year:year};
     };
+    ref.ajax_settings.data.weekdays = Drupal.toJson(ref.settings.calendar.weekdays);
     $.ajax(ref.ajax_settings);
   };
   
@@ -78,6 +79,7 @@ function calendar() {
     ref.setWidth();
     ref.setColors();
     ref.addResponseListeners();
+    ref.pngFix();
   };
   
   ref.addResponseListeners = function(result) {
@@ -93,10 +95,48 @@ function calendar() {
     });
   };
   
+  ref.pngFix = function() {
+    if($.browser.msie && parseInt($.browser.version) < 7) {
+      $('#calendar_row0, .hok').each(function() {
+        var css_bg_img = $(this).css('background-image');
+        if (css_bg_img !== 'none') {
+          var bg_img = css_bg_img.substring(5, css_bg_img.length - 2);
+          $(this).css({
+            'background':'none', 'filter':'progid:DXImageTransform.Microsoft.AlphaImageLoader(src="' + bg_img + '", sizingMethod="crop")'
+          }).find('a').parent().parent().css({'cursor':'pointer', 'background':'red'}).click(function() {
+            window.location = $(this).find('a').attr('href');
+          });
+        };
+      });
+    };
+  };
+  
   return ref;
 };
 
 $(function() {
+  // Check ik Drupal.toJson exists, otherwise create it.
+  if (!Drupal.toJson) {
+    Drupal.toJson = function(v) {
+      switch (typeof v) {
+        case 'boolean':
+          return v == true ? 'true' : 'false';
+        case 'number':
+          return v;
+        case 'string':
+          return '"'+ v.replace(/\n/g, '\\n') +'"';
+        case 'object':
+          var output = "{";
+          for(i in v) {
+            output = output + '"' + i + '"' + ":" + Drupal.toJson(v[i]) + ",";
+          }
+          output = output.substr(0, output.length - 1) + "}";
+          return (output == '}') ? 'null' : output;
+        default:
+          return 'null';
+      };
+    };
+  };
 	Drupal.calendar = new calendar();
 	Drupal.calendar.init();
 });

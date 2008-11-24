@@ -2,4 +2,5 @@
 name = Calendar Block
 description = Highly customizable calendar block for various purposes 
 package = User Interface
-version = 5.7
+version = VERSION
+core = 6.x
