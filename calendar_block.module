@@ -404,14 +404,14 @@ if (!function_exists('json_decode')) {
       $v = array();
       foreach ($var as $value) {
         $va = explode(":", $value);
-        $v[$va[0]] = drupal_parse_json($va[1]);
+        $v[$va[0]] = json_decode($va[1]);
       }
     }
     elseif ($v{0} == '[') {
       $var = explode(",", drupal_substr($v, 1, -2));
       $v = array();
       foreach ($var as $value) {
-        $v[] = drupal_parse_json($va[0]);
+        $v[] = json_decode($va[0]);
       }
     }
     return $v;
