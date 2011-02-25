@@ -1,4 +1,3 @@
-; $Id$
 name = Calendar Block
 description = Highly customizable calendar block for various purposes 
 package = User Interface
