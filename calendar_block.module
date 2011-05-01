@@ -274,14 +274,3 @@ if (!function_exists('cal_days_in_month')) {
     return $month == 2 ? ($year % 4 ? 28 : ($year % 100 ? 29 : ($year % 400 ? 28 : 29))) : (($month - 1) % 7 % 2 ? 30 : 31);
   }
 }
-
-/**
- * 
- */
-function calendar_block_calendar_block_element_alter(&$element) {
-  // dpm($element);
-  $date = $element['#date'];
-  if ($date->year == 2011 && $date->day == 30) {
-    $element['#prefix'] = '!';
-  }
-}
