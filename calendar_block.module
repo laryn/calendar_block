@@ -31,6 +31,16 @@ function calendar_block_block_info() {
 }
 
 /**
+ * Implements hook_config_info().
+ */
+function calendar_block_config_info() {
+  $prefixes['calendar_block.settings'] = array(
+    'label' => t('Module name settings'),
+    'group' => t('Configuration'),
+  );
+}
+
+/**
  * Implements hook_block_configure().
  */
 function calendar_block_block_configure($delta = '') {
@@ -38,25 +48,29 @@ function calendar_block_block_configure($delta = '') {
   $form = array();
   if ($delta == 'calendar') {
     $form['show_weekdays'] = array(
-      '#type' => 'checkbox', 
-      '#title' => t('Display the days of the week'), 
-      '#default_value' => variable_get('calendar_block_show_weekdays', FALSE),
+      '#type' => 'checkbox',
+      '#title' => t('Display the days of the week'),
+      '#default_value' => config_get('calendar_block.settings', 'calendar_block_show_weekdays'),
       '#weight' => 5,
     );
   }
   return $form;
 }
 
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
 function calendar_block_block_save($delta = '', $edit = array()) {
   if ($delta == 'calendar') {
-    variable_set('calendar_block_show_weekdays', $edit['show_weekdays']);
+    config_set('calendar_block.settings', 'calendar_block_show_weekdays', $edit['show_weekdays']);
   }
 }
 /**
  * Implements hook_block_view().
  */
 function calendar_block_block_view($delta) {
-  $path = drupal_get_path('module', 'calendar_block');
+  $path = backdrop_get_path('module', 'calendar_block');
   $year = isset($_GET['calendar_block_year']) ? $_GET['calendar_block_year'] : NULL;
   $month = isset($_GET['calendar_block_month']) ? $_GET['calendar_block_month'] : NULL;
 
@@ -87,6 +101,7 @@ function calendar_block_theme() {
  *
  */
 function calendar_block_load($year = NULL, $month = NULL) {
+  // TODO This variable was probably removed in Backdrop without replacement.
   $first_day = variable_get('date_first_day', 0);
   $weekdays = array('su', 'mo', 'tu', 'we', 'th', 'fr', 'sa');
   $weekdays = array_merge(array_slice($weekdays, $first_day), array_slice($weekdays, 0, $first_day));
@@ -97,11 +112,11 @@ function calendar_block_load($year = NULL, $month = NULL) {
     'month' => $month ? (int) $month : date('m'),
     'weekdays' => $weekdays,
   );
-  $calendar->show_weekdays = variable_get('calendar_block_show_weekdays', TRUE);
+  $calendar->show_weekdays = config_get('calendar_block.settings', 'calendar_block_show_weekdays');
 
   $date = (object) array();
   // Give other modules the opportunity set the date for the calendar
-  drupal_alter('calendar_block_date', $calendar, $date);
+  backdrop_alter('calendar_block_date', $calendar, $date);
 
   $calendar->timestamp = ($calendar->year && $calendar->month) ? mktime(1, 1, 1, $calendar->month, 1, $calendar->year) : REQUEST_TIME;
 
@@ -117,7 +132,7 @@ function calendar_block_load($year = NULL, $month = NULL) {
 
   $calendar->month_str = date('F', $calendar->timestamp); // The current month (September)
   $calendar->days_in_month = cal_days_in_month(0, $calendar->month, $calendar->year); // The number of days in this month (31)
-  $calendar->first_day_of_month = drupal_substr(drupal_strtolower(date('D', mktime(0, 0, 0, $calendar->month, 1, $calendar->year))), 0, 2); // The first week day of this month (mo, tu, we ....)
+  $calendar->first_day_of_month = backdrop_substr(backdrop_strtolower(date('D', mktime(0, 0, 0, $calendar->month, 1, $calendar->year))), 0, 2); // The first week day of this month (mo, tu, we ....)
 
   // If the first day of the month is not the same as the first day in the weekdays, set in the configuration settings,
   // we need to set the last days of the previous month first
@@ -125,12 +140,12 @@ function calendar_block_load($year = NULL, $month = NULL) {
     if ($calendar->first_day_of_month !== $weekdays[0]) {
       $prev_month = ($calendar->month > 1) ? $calendar->month -1 : 12;
       $prev_year = ($calendar->month > 1) ? $calendar->year : $calendar->year - 1;
-  
+
       $tmp_array = $weekdays;
       $tmp_array = array_flip($tmp_array);
       $calendar->previous_days_offset = $tmp_array[$calendar->first_day_of_month];
       $calendar->days_in_previous_month = cal_days_in_month(0, $prev_month, $prev_year);
-  
+
       for ($i = $calendar->previous_days_offset - 1; $i > -1; $i--) {
         $calendar->dates[] = (object) array(
           'year' => $prev_year,
@@ -181,20 +196,20 @@ function calendar_block_preprocess_calendar_block(&$variables) {
   $variables['header'] = format_date($calendar->timestamp, 'custom', 'F Y');
   $variables['prev_class'] = ($calendar->month > 1 ? ($calendar->month - 1) . '-' . $calendar->year : '12-' . ($calendar->year - 1));
   $variables['next_class'] = ($calendar->month < 12 ? ($calendar->month + 1) . '-' . $calendar->year : '01-' . ($calendar->year + 1));
-  
+
   $next_month = ($calendar->month < 12 ? ($calendar->month + 1) : 1);
   $prev_month = ($calendar->month > 1 ? ($calendar->month - 1) : 12);
   $year_next = ($next_month == 1 ? ($calendar->year + 1) : $calendar->year);
   $year_prev = ($prev_month == 12 ? ($calendar->year - 1) : $calendar->year);
 
   $variables['previous_link'] = l('<', $_GET['q'], array('query' => array(
-    'calendar_block_month' => $prev_month,
-    'calendar_block_year' => $year_prev,
-  )));
+      'calendar_block_month' => $prev_month,
+      'calendar_block_year' => $year_prev,
+    )));
   $variables['next_link'] = l('>', $_GET['q'], array('query' => array(
-    'calendar_block_month' => $next_month,
-    'calendar_block_year' => $year_next,
-  )));
+      'calendar_block_month' => $next_month,
+      'calendar_block_year' => $year_next,
+    )));
 
   if ($calendar->show_weekdays) {
     // Create the weekdays row
@@ -254,7 +269,7 @@ function calendar_block_preprocess_calendar_block(&$variables) {
     }
 
     // Give other modules the opportunity to change the content for each date
-    drupal_alter('calendar_block_element', $element);
+    backdrop_alter('calendar_block_element', $element);
 
     $variables['rows_dates'][$key_row]['data'][$key_column] = $element;
 

@@ -1,0 +1,23 @@
+<?php
+/**
+ * @file
+ * Install, update and uninstall functions for the calendar_block module.
+ *
+ */
+
+
+/**
+ * Implements hook_update_N().
+ */
+function calendar_block_update_1000() {
+  $config = config('calendar_block.settings');
+  $config->set('calendar_block_show_weekdays', update_variable_get('calendar_block_show_weekdays', 'TRUE'));
+  update_variable_del('calendar_block_show_weekdays');
+}
+
+/**
+ * Implements hook_install().
+ */
+function calendar_block_install() {
+  // Dynamically generated variable data was detected.
+}

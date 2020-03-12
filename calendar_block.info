@@ -3,5 +3,5 @@ name = Calendar Block
 description = Highly customizable calendar block for various purposes 
 package = User Interface
 version = VERSION
-core = 7.x
-files[] = calendar_block.module
+backdrop = 1.x
+type = module

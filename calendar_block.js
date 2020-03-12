@@ -4,7 +4,7 @@ function calendar() {
   ref.ajax_settings = {};
 
   ref.init = function() {
-    ref.settings = Drupal.settings.calendar_block;
+    ref.settings = Backdrop.settings.calendar_block;
     //trace(ref.settings);
 
     ref.ajax_settings = {type: "POST", url: ref.settings.ajax_response_path, success:function(result) { ref.ajaxResponse(result)}};
@@ -60,7 +60,7 @@ function calendar() {
     if (year && month) {
       ref.ajax_settings.data = {month:month, year:year};
     };
-    ref.ajax_settings.data.weekdays = Drupal.toJson(ref.settings.calendar.weekdays);
+    ref.ajax_settings.data.weekdays = Backdrop.toJson(ref.settings.calendar.weekdays);
     $.ajax(ref.ajax_settings);
   };
   
@@ -115,9 +115,9 @@ function calendar() {
 };
 
 $(function() {
-  // Check ik Drupal.toJson exists, otherwise create it.
-  if (!Drupal.toJson) {
-    Drupal.toJson = function(v) {
+  // Check ik Backdrop.toJson exists, otherwise create it.
+  if (!Backdrop.toJson) {
+    Backdrop.toJson = function(v) {
       switch (typeof v) {
         case 'boolean':
           return v == true ? 'true' : 'false';
@@ -128,7 +128,7 @@ $(function() {
         case 'object':
           var output = "{";
           for(i in v) {
-            output = output + '"' + i + '"' + ":" + Drupal.toJson(v[i]) + ",";
+            output = output + '"' + i + '"' + ":" + Backdrop.toJson(v[i]) + ",";
           }
           output = output.substr(0, output.length - 1) + "}";
           return (output == '}') ? 'null' : output;
@@ -137,6 +137,6 @@ $(function() {
       };
     };
   };
-	Drupal.calendar = new calendar();
-	Drupal.calendar.init();
+	Backdrop.calendar = new calendar();
+	Backdrop.calendar.init();
 });
